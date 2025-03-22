@@ -494,6 +494,7 @@ CREATE TABLE IF NOT EXISTS `google_drive_file` (
   CONSTRAINT `google_drive_file_ibfk_1` FOREIGN KEY (`lead_id`) REFERENCES `trigger_lead` (`lead_id`),
   CONSTRAINT `google_drive_file_ibfk_2` FOREIGN KEY (`contract_id`) REFERENCES `trigger_contract` (`contract_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
