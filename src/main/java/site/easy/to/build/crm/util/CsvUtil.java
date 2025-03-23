@@ -37,7 +37,11 @@ public class CsvUtil {
         return new CSVParser(reader, format);
     }
 
-    public static <T> List<T> parseCSV(CSVParser csvParser, Class<T> clazz, ApplicationContext applicationContext, EntityManager entityManager) throws Exception {
+    public static <T> List<T> parseCSV(
+            CSVParser csvParser, Class<T> clazz,
+            ApplicationContext applicationContext,
+            EntityManager entityManager) throws Exception {
+
         List<T> resultList = new ArrayList<>();
         Field[] fields = clazz.getDeclaredFields();
 
@@ -47,24 +51,32 @@ public class CsvUtil {
             for (Field field : fields) {
                 field.setAccessible(true);
                 String columnName = getColumnName(field);
-                if (columnName!=null){
+
+                if (columnName != null) {
                     if (record.isMapped(columnName)) {
                         String value = record.get(columnName);
-                        if (value != null && !value.isEmpty()) {
+
+                        // 💡 Si la valeur est vide ou null, on met explicitement null
+                        if (value == null || value.trim().isEmpty()) {
+                            field.set(obj, null);
+                        } else {
                             Object convertedValue = convertValue(value, field.getType());
+
+                            // 💡 Si la conversion est null, on cherche dans l'EntityManager
                             if (convertedValue == null) {
-                                convertedValue = entityManager.find(field.getType(),Integer.parseInt(value));
+                                convertedValue = entityManager.find(field.getType(), Integer.parseInt(value));
                             }
+
                             field.set(obj, convertedValue);
                         }
                     }
                 }
-
             }
             resultList.add(obj);
         }
         return resultList;
     }
+
 
     private static String getColumnName(Field field) {
         if (field.isAnnotationPresent(Column.class)) {
