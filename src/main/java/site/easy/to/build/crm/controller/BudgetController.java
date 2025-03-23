@@ -31,11 +31,12 @@ public class BudgetController {
         this.customerService = customerService;
     }
 
-
     @PostMapping("/save")
     public String saveBudget(@ModelAttribute Budget budget,Authentication authentication){
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         Customer customer = customerService.findByCustomerId(userId);
+        double cumul = budgetService.getTotalBudgetByCustomerId(userId);
+        budget.setValeur(cumul+budget.getValeur());
         budget.setCustomer(customer);
         budgetService.save(budget);
         return "redirect:/budgets/create";
