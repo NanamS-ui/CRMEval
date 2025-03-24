@@ -74,38 +74,33 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Tickets</h4>
+                            <h4 class="card-title">Notifications</h4>
                             <div class="table-responsive m-t-40">
                                 <table id="config-table" class="table display table-bordered table-striped no-wrap">
                                     <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Subject</th>
-                                        <th>priority</th>
-                                        <th>Status</th>
-                                        <th>Customer</th>
-                                        <th>Assigned Employee</th>
-                                        <th>Add expense</th>
-                                        <th>Show Full Details</th>
-                                        <th>Edit</th>
-                                        <th>Delete</th>
+                                        <th>Message</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr th:if="${tickets != null}" th:each="ticket : ${tickets}">
-                                        <td th:text="${ticket.ticketId}"></td>
-                                        <td th:text="${ticket.subject}"></td>
-                                        <td th:text="${ticket.priority}"></td>
-                                        <td th:text="${ticket.status}"></td>
-                                        <td th:text="${ticket.customer.name}"></td>
-                                        <td th:text="${ticket.employee.username}"></td>
-                                        <td><a th:href="${home + 'expense/form-expense/ticket/' + ticket.ticketId + '/'+ ticket.customer.customerId}"><i class="fas fa-eye"></i></a></td>
-                                        <td><a th:href="${home + 'employee/ticket/show-ticket/' + ticket.ticketId}"><i class="fas fa-eye"></i></a></td>
-                                        <td><a th:href="${home + 'employee/ticket/update-ticket/' + ticket.ticketId}"><i class="fas fa-edit"></i></a></td>
+                                    <tr th:each="notification : ${notifications}">
+                                        <td th:text="${notification.notificationId}"></td>
+                                        <td th:text="${notification.message}"></td>
+                                        <td th:text="${notification.dateNotification}"></td>
                                         <td>
-                                            <form th:action="${home + 'employee/ticket/delete-ticket/' + ticket.ticketId}" method="post">
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i class="mdi mdi-delete"></i>
+                                            <!-- Formulaire pour valider la notification -->
+                                            <form th:action="@{/notifications/{notificationId}/etat/1 (notificationId=${notification.notificationId})}" method="post" class="d-inline-block">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="bi bi-check-circle"></i> Valider
+                                                </button>
+                                            </form>
+                                            <!-- Formulaire pour refuser la notification -->
+                                            <form th:action="@{/notifications/{notificationId}/etat/-1 (notificationId=${notification.notificationId})}" method="post" class="d-inline-block">
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="bi bi-x-circle"></i> Refuser
                                                 </button>
                                             </form>
                                         </td>
@@ -153,21 +148,21 @@
 <script th:inline="javascript">
     var home = /*[[${home}]]*/ null;
 </script>
-<script th:src="@{/js/library/jquery-3.2.1.min.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/jquery-3.2.1.min.js}" type="text/javascript"></script>
 <!--    &lt;!&ndash; Bootstrap tether Core JavaScript &ndash;&gt;-->
-<script th:src="@{/js/library/popper.min.js}" type="text/javascript">></script>
-<script th:src="@{/js/library/bootstrap.min.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/library/bootstrap.min.js}" type="text/javascript"></script>
 <!--    &lt;!&ndash; slimscrollbar scrollbar JavaScript &ndash;&gt;-->
-<script th:src="@{/js/library/perfect-scrollbar.jquery.min.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/perfect-scrollbar.jquery.min.js}" type="text/javascript"></script>
 <!--Wave Effects -->
-<script th:src="@{/js/library/waves.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/waves.js}" type="text/javascript"></script>
 <!--Menu sidebar -->
-<script th:src="@{/js/library/sidebarmenu.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/sidebarmenu.js}" type="text/javascript"></script>
 <!--stickey kit -->
 <script th:src="@{/js/library/sticky-kit.min.js}"></script>
-<script th:src="@{/js/library/jquery.sparkline.min.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/jquery.sparkline.min.js}" type="text/javascript"></script>
 <!--Custom JavaScript -->
-<script th:src="@{/js/library/custom.min.js}" type="text/javascript">></script>
+<script th:src="@{/js/library/custom.min.js}" type="text/javascript"></script>
 <!-- Editable -->
 <script th:src="@{/js/library/jquery.dataTables.min.js}"></script>
 <script th:src="@{/js/library/dataTables.responsive.min.js}"></script>

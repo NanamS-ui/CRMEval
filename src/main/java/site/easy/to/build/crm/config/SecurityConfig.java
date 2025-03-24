@@ -55,6 +55,7 @@ public class SecurityConfig {
 
         http.csrf((csrf) -> csrf
                 .csrfTokenRepository(httpSessionCsrfTokenRepository)
+                .ignoringRequestMatchers("/api/**")
         );
 
         http.

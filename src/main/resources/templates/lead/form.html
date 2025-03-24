@@ -80,7 +80,7 @@
                             <form th:action="@{/expense/save/lead}" enctype="multipart/form-data" id="email-form" method="post">
                                 <!-- Correction de l'id_lead -->
                                 <input type="hidden" name="id-lead" th:value="${id_lead}">
-
+                                <input type="hidden" name="id-customer" th:value="${id_customer}">
                                 <label class="m-t-20" for="subject">Somme:</label>
                                 <div class="input-group">
                                     <input type="text" id="subject" name="somme" class="form-control">

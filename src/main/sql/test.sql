@@ -221,8 +221,10 @@ CREATE TABLE notification(
                              date_notification DATETIME NOT NULL,
                              etat INT DEFAULT NULL,
                              customer_id INT UNSIGNED NOT NULL,
+                             id_depense INT NOT NULL,
                              PRIMARY KEY(notification_id),
-                             FOREIGN KEY(customer_id) REFERENCES customer(customer_id)
+                             FOREIGN KEY(customer_id) REFERENCES customer(customer_id),
+                             FOREIGN KEY(id_depense) REFERENCES depense(depense_id)
 );
 
 CREATE TABLE depense(

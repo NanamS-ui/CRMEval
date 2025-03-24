@@ -7,7 +7,9 @@ import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.repository.LeadRepository;
 import site.easy.to.build.crm.entity.Lead;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LeadServiceImpl implements LeadService {
@@ -94,4 +96,20 @@ public class LeadServiceImpl implements LeadService {
     public long countByCustomerId(int customerId) {
         return leadRepository.countByCustomerCustomerId(customerId);
     }
+
+    @Override
+    public Map<String, Long> getLeadCountByStatus() {
+        List<Lead> allLeads = leadRepository.findAll();
+
+        Map<String, Long> leadCountByStatus = new HashMap<>();
+
+        for (Lead lead : allLeads) {
+            String status = lead.getStatus();
+            leadCountByStatus.put(status, leadCountByStatus.getOrDefault(status, 0L) + 1);
+        }
+
+        return leadCountByStatus;
+    }
+
+
 }

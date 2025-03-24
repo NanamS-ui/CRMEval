@@ -39,6 +39,19 @@ public class DepenseServiceImpl implements DepenseService {
         depenseRepository.deleteById(id);
     }
 
+    @Override
+    public Depense updateDepense(Integer id, Depense updatedDepense) {
+        return depenseRepository.findById(id)
+                .map(existingDepense -> {
+                    existingDepense.setValeurDepense(updatedDepense.getValeurDepense());
+                    existingDepense.setEtat(updatedDepense.getEtat());
+                    existingDepense.setLead(updatedDepense.getLead());
+                    existingDepense.setTicket(updatedDepense.getTicket());
+                    return depenseRepository.save(existingDepense);
+                })
+                .orElseThrow(() -> new RuntimeException("Dépense non trouvée avec l'ID : " + id));
+    }
+
 
     @Override
     public Depense findByLead(Lead leadId) {
@@ -50,4 +63,13 @@ public class DepenseServiceImpl implements DepenseService {
         return depenseRepository.findByTicket(ticket); // Recherche de la dépense par lead_id
     }
 
+    @Override
+    public double getTotalDepenseByCustomerId(int customerId) {
+        return depenseRepository.getTotalDepenseByCustomerId(customerId);
+    }
+
+    @Override
+    public void updateDepenseValue(int depenseId, double valeurDepense) {
+        depenseRepository.updateById(depenseId, valeurDepense);
+    }
 }
