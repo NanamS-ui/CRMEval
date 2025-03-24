@@ -14,4 +14,7 @@ public interface DepenseService {
     void deleteDepense(Integer id);
     Depense findByLead(Lead id);
     Depense findByTicket(Ticket ticket);
+    public Depense updateDepense(Integer id, Depense updatedDepense);
+    double getTotalDepenseByCustomerId(int customerId);
+    public void updateDepenseValue(int depenseId, double valeurDepense);
 }

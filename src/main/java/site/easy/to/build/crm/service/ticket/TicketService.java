@@ -4,6 +4,7 @@ import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Ticket;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TicketService {
     public Ticket findByTicketId(int id);
@@ -11,7 +12,7 @@ public interface TicketService {
     public Ticket save(Ticket ticket);
 
     public void delete(Ticket ticket);
-
+    public Map<String, Long> getTicketCountByStatus();
     public List<Ticket> findManagerTickets(int id);
 
     public List<Ticket> findEmployeeTickets(int id);

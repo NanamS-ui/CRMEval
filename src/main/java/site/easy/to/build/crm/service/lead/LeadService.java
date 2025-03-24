@@ -4,6 +4,7 @@ import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Lead;
 
 import java.util.List;
+import java.util.Map;
 
 public interface LeadService {
     public Lead findByLeadId(int id);
@@ -22,7 +23,7 @@ public interface LeadService {
 
     public List<Lead> getRecentLeads(int mangerId, int limit);
     public List<Lead> getCustomerLeads(int customerId);
-
+    public Map<String, Long> getLeadCountByStatus();
     long countByEmployeeId(int employeeId);
 
     long countByManagerId(int managerId);

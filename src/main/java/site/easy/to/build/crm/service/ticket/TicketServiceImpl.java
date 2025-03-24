@@ -4,10 +4,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import site.easy.to.build.crm.entity.Customer;
+import site.easy.to.build.crm.entity.Lead;
 import site.easy.to.build.crm.repository.TicketRepository;
 import site.easy.to.build.crm.entity.Ticket;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TicketServiceImpl implements TicketService{
@@ -89,5 +92,19 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public void deleteAllByCustomer(Customer customer) {
         ticketRepository.deleteAllByCustomer(customer);
+    }
+
+    @Override
+    public Map<String, Long> getTicketCountByStatus() {
+        List<Ticket> allLeads = ticketRepository.findAll();
+
+        Map<String, Long> leadCountByStatus = new HashMap<>();
+
+        for (Ticket lead : allLeads) {
+            String status = lead.getStatus();
+            leadCountByStatus.put(status, leadCountByStatus.getOrDefault(status, 0L) + 1);
+        }
+
+        return leadCountByStatus;
     }
 }
