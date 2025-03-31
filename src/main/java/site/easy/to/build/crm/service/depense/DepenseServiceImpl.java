@@ -1,6 +1,9 @@
 package site.easy.to.build.crm.service.depense;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,11 @@ public class DepenseServiceImpl implements DepenseService {
     @Override
     public Depense saveDepense(Depense depense) {
         return depenseRepository.save(depense);
+    }
+
+    @Override
+    public void saveDepense2(Double valeurDepense, String dateDepense, String etat, int leadId) {
+        depenseRepository.insertDepense(valeurDepense, dateDepense, etat, leadId);
     }
 
     @Override
@@ -71,5 +79,56 @@ public class DepenseServiceImpl implements DepenseService {
     @Override
     public void updateDepenseValue(int depenseId, double valeurDepense) {
         depenseRepository.updateById(depenseId, valeurDepense);
+    }
+
+    @Override
+    public Map<Integer, Depense> getDepensesParLead(List<Lead> leads) {
+        Map<Integer, Depense> depensesParLead = new HashMap<>();
+
+        for (Lead lead : leads) {
+            // Récupérer la dépense associée à ce Lead
+            Depense depense = depenseRepository.findByLead(lead);
+            if (depense != null) {
+                // Si une dépense existe, on l'ajoute
+                depensesParLead.put(lead.getLeadId(), depense);
+            }
+        }
+
+        return depensesParLead;
+    }
+
+    // Récupère la dépense associée à chaque Ticket
+    public Map<Integer, Depense> getDepensesParTicket(List<Ticket> tickets) {
+        Map<Integer, Depense> depensesParTicket = new HashMap<>();
+
+        for (Ticket ticket : tickets) {
+            // Récupérer la dépense associée à ce Ticket
+            Depense depense = depenseRepository.findByTicket(ticket);
+            if (depense != null) {
+                // Si une dépense existe, on l'ajoute
+                depensesParTicket.put(ticket.getTicketId(), depense);
+            }
+        }
+
+        return depensesParTicket;
+    }
+
+    @Override
+    public Depense saveDepense(Map<String, Object> depenseData) {
+        Double valeurDepense = (Double) depenseData.get("valeur_depense");
+        String dateDepense = (String) depenseData.get("date_depense");
+        int etat = (int)depenseData.get("etat");
+        int leadId = (int)depenseData.get("lead_id");
+
+        Depense depense = new Depense();
+        depense.setValeurDepense(valeurDepense);
+        depense.setDateDepense(LocalDateTime.parse(dateDepense));
+        depense.setEtat(etat);
+
+        Lead lead = new Lead();
+        lead.setLeadId(leadId);
+        depense.setLead(lead);
+
+        return depenseRepository.save(depense);
     }
 }

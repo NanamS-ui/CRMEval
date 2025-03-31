@@ -24,6 +24,8 @@ public class CustomerLoginInfo {
     @Column(name = "password_set")
     private Boolean passwordSet;
 
+
+
     @OneToOne(mappedBy = "customerLoginInfo", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("customerLoginInfo")
     @PrimaryKeyJoinColumn

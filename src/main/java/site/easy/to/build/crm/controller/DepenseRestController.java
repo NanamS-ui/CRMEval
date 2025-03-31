@@ -6,6 +6,8 @@ import site.easy.to.build.crm.entity.Depense;
 import site.easy.to.build.crm.repository.DepenseRepository;
 import site.easy.to.build.crm.service.depense.DepenseService;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/depenses")
 public class DepenseRestController {
@@ -32,4 +34,8 @@ public class DepenseRestController {
         return ResponseEntity.ok(depense);
     }
 
+    @PostMapping
+    public Depense saveDepense(@RequestBody Map<String, Object> depenseData) {
+        return depenseService.saveDepense(depenseData);
+    }
 }

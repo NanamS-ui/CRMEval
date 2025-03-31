@@ -1,41 +1,75 @@
 DELIMITER //
 
-CREATE PROCEDURE GenerateRandomData(IN nombreDeLigne INT)
+CREATE PROCEDURE GenerateRandomData(
+    IN nombreDeLigneCustomer_info_login_et_Customer INT,
+    IN nombreLigne_trigger_lead INT,
+    IN nombreLigne_trigger_ticket INT,
+    IN nombreDeLigne_depense INT,
+    IN nombreDeLigne_budget INT
+)
 BEGIN
     DECLARE i INT DEFAULT 0;
     DECLARE max_users INT;
-    DECLARE max_customers INT;
-    DECLARE last_lead_id INT;
-    DECLARE last_ticket_id INT;
+    DECLARE random_user_id INT;
+    DECLARE random_email VARCHAR(255);
+    DECLARE hashed_password VARCHAR(255);
+    DECLARE generated_token VARCHAR(255);
+    DECLARE random_login_id INT;
+    DECLARE random_customer_id INT;
+    DECLARE random_lead_id INT;
+    DECLARE random_ticket_id INT;
 
-    -- Vérifier le nombre d'enregistrements
+    -- Désactiver temporairement les contraintes de clé étrangère
+    SET FOREIGN_KEY_CHECKS = 0;
+
+    -- Récupération du nombre d'utilisateurs disponibles
 SELECT COUNT(*) INTO max_users FROM users;
-SELECT COUNT(*) INTO max_customers FROM customer;
 
--- Vérifier si les tables contiennent des données
-IF max_users = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Aucun utilisateur trouvé dans la table users';
+-- Insertion des clients et leurs informations de connexion
+WHILE i < nombreDeLigneCustomer_info_login_et_Customer DO
+        -- Sélection aléatoire d'un utilisateur existant ou NULL
+        IF max_users > 0 THEN
+SELECT id INTO random_user_id FROM users ORDER BY RAND() LIMIT 1;
+ELSE
+            SET random_user_id = NULL;
 END IF;
 
-    IF max_customers = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Aucun client trouvé dans la table customer';
-END IF;
+        SET random_email = CONCAT('user', i, '@example.com');
+        SET hashed_password = SHA2(CONCAT('1234', i), 256); -- SHA-256
+        SET generated_token = UUID();
 
-    WHILE i < nombreDeLigne DO
-        -- Sélectionner un ID existant au hasard
-        SET @random_user_id = (SELECT id FROM users ORDER BY RAND() LIMIT 1);
-        SET @random_customer_id = (SELECT customer_id FROM customer ORDER BY RAND() LIMIT 1);
+        -- Insertion dans customer_login_info
+INSERT INTO customer_login_info (password, username, token, password_set)
+VALUES (hashed_password, random_email, generated_token, 1);
+SET random_login_id = LAST_INSERT_ID();
 
-        -- Choisir aléatoirement si la dépense sera liée à un lead ou un ticket
-        IF RAND() > 0.5 THEN
-            -- Création d'un trigger_lead
+        -- Insertion dans customer
+INSERT INTO customer (name, phone, address, country, email, description, profile_id, user_id)
+VALUES (
+           CONCAT('Client ', i),
+           CONCAT('+12345678', LPAD(i, 2, '0')),
+           CONCAT('Address ', i),
+           'USA',
+           random_email,
+           'Generated customer',
+           random_login_id,
+           random_user_id
+       );
+SET random_customer_id = LAST_INSERT_ID();
+
+        SET i = i + 1;
+END WHILE;
+
+    -- Insertion des leads
+    SET i = 0;
+    WHILE i < nombreLigne_trigger_lead DO
+        -- Vérifier qu'il y a des clients disponibles
+        IF EXISTS (SELECT 1 FROM customer) THEN
             INSERT INTO trigger_lead (customer_id, employee_id, user_id, name, phone, status, created_at)
             VALUES (
-                @random_customer_id,
-                @random_user_id,
-                @random_user_id,
+                (SELECT customer_id FROM customer ORDER BY RAND() LIMIT 1),
+                (SELECT id FROM users ORDER BY RAND() LIMIT 1),
+                (SELECT id FROM users ORDER BY RAND() LIMIT 1),
                 CONCAT('LeadName', i),
                 CONCAT('+123456789', FLOOR(RAND() * 100)),
                 CASE FLOOR(RAND() * 4)
@@ -46,15 +80,23 @@ END IF;
                 END,
                 NOW() - INTERVAL FLOOR(RAND() * 30) DAY
             );
-            SET last_lead_id = LAST_INSERT_ID();
-            SET last_ticket_id = NULL;
+            SET i = i + 1;
 ELSE
-            -- Création d'un trigger_ticket
+            -- Si aucun client n'est disponible, sortir de la boucle
+            SET i = nombreLigne_trigger_lead;
+END IF;
+END WHILE;
+
+    -- Insertion des tickets
+    SET i = 0;
+    WHILE i < nombreLigne_trigger_ticket DO
+        -- Vérifier qu'il y a des clients disponibles
+        IF EXISTS (SELECT 1 FROM customer) THEN
             INSERT INTO trigger_ticket (customer_id, manager_id, employee_id, subject, description, status, priority, created_at)
             VALUES (
-                @random_customer_id,
-                @random_user_id,
-                @random_user_id,
+                (SELECT customer_id FROM customer ORDER BY RAND() LIMIT 1),
+                (SELECT id FROM users ORDER BY RAND() LIMIT 1),
+                (SELECT id FROM users ORDER BY RAND() LIMIT 1),
                 CONCAT('TicketSubject', i),
                 CONCAT('Description ', i),
                 CASE FLOOR(RAND() * 9)
@@ -78,30 +120,75 @@ ELSE
                 END,
                 NOW() - INTERVAL FLOOR(RAND() * 30) DAY
             );
-            SET last_ticket_id = LAST_INSERT_ID();
-            SET last_lead_id = NULL;
+            SET i = i + 1;
+ELSE
+            -- Si aucun client n'est disponible, sortir de la boucle
+            SET i = nombreLigne_trigger_ticket;
 END IF;
-
-        -- Insertion dans budget
-INSERT INTO budget (customer_id, valeur, date_budget)
-VALUES (
-           @random_customer_id,
-           ROUND(RAND() * 1000, 2),
-           NOW() - INTERVAL FLOOR(RAND() * 30) DAY
-       );
-
--- Insertion dans depense (associée obligatoirement à un lead ou un ticket)
-INSERT INTO depense (valeur_depense, date_depense, etat, lead_id, ticket_id)
-VALUES (
-           ROUND(RAND() * 500, 2),
-           NOW() - INTERVAL FLOOR(RAND() * 30) DAY,
-           FLOOR(RAND() * 3),
-           last_lead_id,  -- Soit un lead est affecté, soit un ticket
-           last_ticket_id
-       );
-
-SET i = i + 1;
 END WHILE;
+
+    -- Insertion des budgets
+    SET i = 0;
+    WHILE i < nombreDeLigne_budget DO
+        -- Vérifier qu'il y a des clients disponibles
+        IF EXISTS (SELECT 1 FROM customer) THEN
+            INSERT INTO budget (customer_id, valeur, date_budget)
+            VALUES (
+                (SELECT customer_id FROM customer ORDER BY RAND() LIMIT 1),
+                ROUND(RAND() * 1000, 2),
+                NOW() - INTERVAL FLOOR(RAND() * 30) DAY
+            );
+            SET i = i + 1;
+ELSE
+            -- Si aucun client n'est disponible, sortir de la boucle
+            SET i = nombreDeLigne_budget;
+END IF;
+END WHILE;
+
+    -- Insertion des dépenses
+    -- Insertion des dépenses
+SET i = 0;
+WHILE i < nombreDeLigne_depense DO
+    -- Vérifier s'il y a des leads OU des tickets disponibles
+    IF EXISTS (SELECT 1 FROM trigger_lead) OR EXISTS (SELECT 1 FROM trigger_ticket) THEN
+        -- Décider si on utilise un lead ou un ticket (priorité aléatoire)
+        SET @use_lead = CASE
+            WHEN NOT EXISTS (SELECT 1 FROM trigger_lead) THEN 0
+            WHEN NOT EXISTS (SELECT 1 FROM trigger_ticket) THEN 1
+            ELSE RAND() < 0.5 END;
+
+        IF @use_lead = 1 THEN
+            -- Utiliser un lead existant
+            INSERT INTO depense (valeur_depense, date_depense, etat, lead_id, ticket_id)
+            VALUES (
+                ROUND(RAND() * 500, 2),
+                NOW() - INTERVAL FLOOR(RAND() * 30) DAY,
+                FLOOR(RAND() * 3),
+                (SELECT lead_id FROM trigger_lead ORDER BY RAND() LIMIT 1),
+                NULL
+            );
+ELSE
+            -- Utiliser un ticket existant
+            INSERT INTO depense (valeur_depense, date_depense, etat, lead_id, ticket_id)
+            VALUES (
+                ROUND(RAND() * 500, 2),
+                NOW() - INTERVAL FLOOR(RAND() * 30) DAY,
+                FLOOR(RAND() * 3),
+                NULL,
+                (SELECT ticket_id FROM trigger_ticket ORDER BY RAND() LIMIT 1)
+            );
+END IF;
+        SET i = i + 1;
+ELSE
+        -- Si ni leads ni tickets ne sont disponibles, sortir de la boucle
+        SET i = nombreDeLigne_depense;
+END IF;
+END WHILE;
+
+    -- Réactiver les contraintes de clé étrangère
+    SET FOREIGN_KEY_CHECKS = 1;
+
+SELECT 'Données générées avec succès' AS result;
 END //
 
 DELIMITER ;

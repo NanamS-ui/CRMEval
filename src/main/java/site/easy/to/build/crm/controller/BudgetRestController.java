@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.easy.to.build.crm.entity.Budget;
+import site.easy.to.build.crm.repository.BudgetRepository;
 import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.util.AuthenticationUtils;
@@ -20,11 +21,13 @@ public class BudgetRestController {
     private final BudgetService budgetService;
     private final AuthenticationUtils authenticationUtils;
     private final CustomerService customerService;
+    private final BudgetRepository budgetRepository;
 
-    public BudgetRestController(BudgetService budgetService, AuthenticationUtils authenticationUtils, CustomerService customerService) {
+    public BudgetRestController(BudgetService budgetService, AuthenticationUtils authenticationUtils, CustomerService customerService, BudgetRepository budgetRepository) {
         this.budgetService = budgetService;
         this.authenticationUtils = authenticationUtils;
         this.customerService = customerService;
+        this.budgetRepository = budgetRepository;
     }
 
     @GetMapping("/customerBudget")
@@ -32,6 +35,14 @@ public class BudgetRestController {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
 
         List<Budget> budgets = budgetService.findByCustomerId(userId);
+
+        return budgets;
+    }
+
+    @GetMapping("/customerTotalBudget")
+    public double getTotalBudget() {
+
+        double budgets = budgetRepository.getTotalBudget();
 
         return budgets;
     }
@@ -50,5 +61,10 @@ public class BudgetRestController {
         }
 
         return budgetSumByCustomer;
+    }
+
+    @GetMapping("/getDetailsBudget")
+    public  List<Object[]> getBudgetDetails(){
+        return budgetRepository.getTotalBudgetByCustomer();
     }
 }

@@ -15,6 +15,8 @@ public interface DepenseRepository extends JpaRepository<Depense, Integer> {
     Depense findByLead(Lead lead);
     Depense findByTicket(Ticket ticket);
     Depense findByDepenseId(int id);
+    Depense findByTicketTicketId(int ticketId);
+    Depense findByLeadLeadId(int leadId);
 
     @Query("SELECT COALESCE(SUM(d.valeurDepense), 0) " +
             "FROM Depense d " +
@@ -30,10 +32,10 @@ public interface DepenseRepository extends JpaRepository<Depense, Integer> {
 
     @Query("SELECT d FROM Depense d WHERE d.lead IS NOT NULL")
     List<Depense> findAllDepensesForLeads();
-    @Query("SELECT COALESCE(SUM(d.valeurDepense), 0) FROM Depense d WHERE d.ticket IS NOT NULL")
+    @Query("SELECT COALESCE(SUM(d.valeurDepense), 0) FROM Depense d WHERE d.ticket IS NOT NULL AND d.etat =1")
     double getTotalDepenseForTickets();
 
-    @Query("SELECT COALESCE(SUM(d.valeurDepense), 0) FROM Depense d WHERE d.lead IS NOT NULL")
+    @Query("SELECT COALESCE(SUM(d.valeurDepense), 0) FROM Depense d WHERE d.lead IS NOT NULL AND d.etat =1")
     double getTotalDepenseForLeads();
 
     @Modifying
@@ -45,4 +47,15 @@ public interface DepenseRepository extends JpaRepository<Depense, Integer> {
     @Transactional
     @Query("UPDATE Depense d SET d.valeurDepense = :valeurDepense WHERE d.depenseId = :depenseId")
     void updateById(@Param("depenseId") int depenseId, @Param("valeurDepense") double valeurDepense);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO depense (valeur_depense, date_depense, etat, lead_id) VALUES (:valeurDepense, :dateDepense, :etat, :leadId)", nativeQuery = true)
+    void insertDepense(
+            @Param("valeurDepense") Double valeurDepense,
+            @Param("dateDepense") String dateDepense,
+            @Param("etat") String etat,
+            @Param("leadId") int leadId
+    );
+
 }

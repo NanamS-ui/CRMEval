@@ -78,4 +78,8 @@ public class BudgetServiceImpl implements BudgetService {
             return new Notification("successful", date, 1, cust);
         }
     }
+    @Override
+    public void delete(Budget budget){
+        budgetRepository.delete(budget);
+    }
 }

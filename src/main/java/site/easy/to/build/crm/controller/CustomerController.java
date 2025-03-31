@@ -2,6 +2,9 @@ package site.easy.to.build.crm.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,15 +14,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import site.easy.to.build.crm.entity.Customer;
-import site.easy.to.build.crm.entity.CustomerLoginInfo;
-import site.easy.to.build.crm.entity.OAuthUser;
-import site.easy.to.build.crm.entity.User;
+import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.repository.LeadRepository;
+import site.easy.to.build.crm.repository.TicketRepository;
 import site.easy.to.build.crm.service.contract.ContractService;
 import site.easy.to.build.crm.service.customer.CustomerLoginInfoService;
 import site.easy.to.build.crm.service.customer.CustomerService;
+import site.easy.to.build.crm.service.depense.DepenseService;
 import site.easy.to.build.crm.service.lead.LeadService;
 import site.easy.to.build.crm.service.ticket.TicketService;
 import site.easy.to.build.crm.service.user.UserService;
@@ -27,8 +30,10 @@ import site.easy.to.build.crm.util.AuthenticationUtils;
 import site.easy.to.build.crm.util.AuthorizationUtil;
 import site.easy.to.build.crm.util.EmailTokenUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/employee/customer")
@@ -43,11 +48,14 @@ public class CustomerController {
     private final TicketService ticketService;
     private final ContractService contractService;
     private final LeadService leadService;
+    private final LeadRepository leadRepository;
+    private final TicketRepository ticketRepository;
+    private final DepenseService depenseService;
 
     @Autowired
     public CustomerController(CustomerService customerService, UserService userService, CustomerLoginInfoService customerLoginInfoService,
                               AuthenticationUtils authenticationUtils, GoogleGmailApiService googleGmailApiService, Environment environment,
-                              TicketService ticketService, ContractService contractService, LeadService leadService) {
+                              TicketService ticketService, ContractService contractService, LeadService leadService, LeadRepository leadRepository, TicketRepository ticketRepository, DepenseService depenseService) {
         this.customerService = customerService;
         this.userService = userService;
         this.customerLoginInfoService = customerLoginInfoService;
@@ -57,6 +65,9 @@ public class CustomerController {
         this.ticketService = ticketService;
         this.contractService = contractService;
         this.leadService = leadService;
+        this.leadRepository = leadRepository;
+        this.ticketRepository = ticketRepository;
+        this.depenseService = depenseService;
     }
 
     @GetMapping("/manager/all-customers")
@@ -208,6 +219,45 @@ public class CustomerController {
         }
         return "redirect:/employee/customer/my-customers";
     }
+
+
+    @GetMapping("/expoter/{id}")
+    public ResponseEntity<byte[]> expoterDataCustomer(@PathVariable("id") int customerId) {
+        // Crée une copie du client
+        Customer copieCustomer = new Customer();
+
+        // Recherche le client à partir de l'ID
+        Customer customer = customerService.findByCustomerId(customerId);
+
+        copieCustomer.setCustomerId(customer.getCustomerId());
+        copieCustomer.setName(customer.getName());
+        copieCustomer.setEmail("copy_" + customer.getEmail());
+        copieCustomer.setCreatedAt(customer.getCreatedAt());
+        copieCustomer.setCustomerLoginInfo(customer.getCustomerLoginInfo());
+        copieCustomer.setCountry(customer.getCountry());
+        copieCustomer.setUser(customer.getUser());
+
+        // Récupérer la liste des leads et tickets associés au client
+        List<Lead> leads = leadRepository.findByCustomerCustomerId(customerId);
+        List<Ticket> tickets = ticketRepository.findByCustomerCustomerId(customerId);
+
+        // Récupérer les dépenses par lead et par ticket
+        Map<Integer, Depense> depensesParLead = depenseService.getDepensesParLead(leads);
+        Map<Integer, Depense> depensesParTicket = depenseService.getDepensesParTicket(tickets);
+
+        // Générer les données CSV
+        String dataCsv = customerService.generateCsv(copieCustomer, leads, tickets, depensesParLead, depensesParTicket);
+
+        // Convertir le CSV en bytes
+        byte[] csvBytes = dataCsv.getBytes(StandardCharsets.UTF_8);
+
+        // Retourner le fichier CSV en réponse
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename = customer_" + customerId + "_export.csv")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(csvBytes);
+    }
+
 
 
 }

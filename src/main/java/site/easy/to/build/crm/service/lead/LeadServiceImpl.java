@@ -111,5 +111,10 @@ public class LeadServiceImpl implements LeadService {
         return leadCountByStatus;
     }
 
+    @Override
+    public void saveLead(String name, String status, int userId, int customerId, int employeeId) {
+        leadRepository.saveLead(name, status, userId, customerId, employeeId);
+    }
+
 
 }
