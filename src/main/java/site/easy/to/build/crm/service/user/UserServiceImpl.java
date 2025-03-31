@@ -1,6 +1,7 @@
 package site.easy.to.build.crm.service.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import site.easy.to.build.crm.repository.UserRepository;
 import site.easy.to.build.crm.entity.User;
@@ -51,5 +52,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+    public List<User> getUsersByRoleId(@Param("roleId") int role){
+        return userRepository.getUsersByRoleId(role);
     }
 }

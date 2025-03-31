@@ -76,25 +76,13 @@ public class SeuilRestController {
     }
 
     @GetMapping("/actual")
-    public ResponseEntity<Seuil> showSeuilActual(Authentication authentication) {
-        int userId = authenticationUtils.getLoggedInUserId(authentication);
-        User user = userService.findById(userId);
-        if (user == null || user.isInactiveUser()) {
-            return ResponseEntity.status(403).build();
-        }
+    public ResponseEntity<Seuil> showSeuilActual() {
         return ResponseEntity.ok(seuilService.getSeuilActuel());
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Seuil> createSeuil(@RequestBody Seuil seuil, Authentication authentication) {
+    public ResponseEntity<Seuil> createSeuil(@RequestBody Seuil seuil) {
         try {
-            int userId = authenticationUtils.getLoggedInUserId(authentication);
-
-            User user = userService.findById(userId);
-            if (user == null || user.isInactiveUser()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
-            }
-
             seuil.setDateSeuil(LocalDateTime.now());
 
             Seuil createdSeuil = seuilService.addSeuil(seuil);

@@ -4,12 +4,14 @@
 <div th:insert="~{/general/head.html}"></div>
 <meta name="_csrf" content="${_csrf.token}"/>
 <meta name="_csrf_header" content="${_csrf.headerName}"/>
-
+<link rel="stylesheet" th:href="@{/css/bootstrap-wysihtml5.css}"/>
 <!-- Editable CSS -->
-<link rel="stylesheet" type="text/css"
-      th:href="@{/css/dataTables.bootstrap4.css}">
-<link rel="stylesheet" type="text/css"
-      th:href="@{/css/responsive.dataTables.min.css}">
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+<link th:href="@{/css/bootstrap-material-datetimepicker.css}" rel="stylesheet">
+
+<link th:href="@{/css/bootstrap-datepicker.min.css}" rel="stylesheet" type="text/css"/>
+
+<link th:href="@{/css/jquery-clockpicker.min.css}" rel="stylesheet">
 
 <!-- Custom CSS -->
 <link th:href="@{/css/style.min.css}" rel="stylesheet">
@@ -70,40 +72,46 @@
             <!-- ============================================================== -->
             <!-- Start Page Content -->
             <!-- ============================================================== -->
-            <div th:if="${messageError}" class="alert alert-danger">
-                <strong>Erreur :</strong> <span th:text="${messageError}"></span>
-            </div>
             <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Generate Data</h4>
+                            <form th:action="@{/generate/data}" id="generate-data-form" method="post">
+                                <!-- Nombre de lignes à insérer pour chaque table -->
+                                <label class="m-t-20" for="nombreDeLigneCustomer_info_login_et_Customer">Nombre de lignes pour customer_info_login et customer:</label>
+                                <div class="input-group">
+                                    <input type="number" id="nombreDeLigneCustomer_info_login_et_Customer" name="nombreDeLigneCustomer_info_login_et_Customer" class="form-control" required>
+                                </div>
 
-                <form th:action="@{/csv/upload}" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="separator">Sélectionner un separateur</label>
-                        <select name="separator" id="separator" class="form-control" required>
-                            <option value="" hidden="">Choisissez un separateur</option>
-                            <th:block th:each="separator : ${separators}">
-                                <option th:value="${separator}" th:text="${separator}">Separator Name</option>
-                            </th:block>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="csvFile">Sélectionner un fichier customer</label>
-                        <input type="file" name="file" id="csvFile" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="csvFile2">Sélectionner un fichier budget</label>
-                        <input type="file" name="file2" id="csvFile2" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="csvFile1">Sélectionner un fichier lead/ticket</label>
-                        <input type="file" name="file1" id="csvFile1" class="form-control" required />
-                    </div>
+                                <label class="m-t-20" for="nmbreLigne_trigger_lead">Nombre de lignes pour trigger_lead:</label>
+                                <div class="input-group">
+                                    <input type="number" id="nmbreLigne_trigger_lead" name="nmbreLigne_trigger_lead" class="form-control" required>
+                                </div>
 
-                    <button type="submit" class="btn btn-primary">Importer</button>
-                </form>
-                <script th:if="${message != null}">
-                    alert(${message});
-                </script>
+                                <label class="m-t-20" for="nombreLigne_trigger_ticket">Nombre de lignes pour trigger_ticket:</label>
+                                <div class="input-group">
+                                    <input type="number" id="nombreLigne_trigger_ticket" name="nombreLigne_trigger_ticket" class="form-control" required>
+                                </div>
+
+                                <label class="m-t-20" for="nombredeligne_depense">Nombre de lignes pour depense:</label>
+                                <div class="input-group">
+                                    <input type="number" id="nombredeligne_depense" name="nombredeligne_depense" class="form-control" required>
+                                </div>
+
+                                <label class="m-t-20" for="nombredeligne_budget">Nombre de lignes pour budget:</label>
+                                <div class="input-group">
+                                    <input type="number" id="nombredeligne_budget" name="nombredeligne_budget" class="form-control" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary m-t-20">Generate Data</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+
             <!-- ============================================================== -->
             <!-- End Page Content -->
             <!-- ============================================================== -->
@@ -154,14 +162,40 @@
 <script th:src="@{/js/library/sticky-kit.min.js}"></script>
 <script th:src="@{/js/library/jquery.sparkline.min.js}" type="text/javascript">></script>
 <!--Custom JavaScript -->
+<script th:src="@{/js/library/moment.js}"></script>
+<script th:src="@{/js/library/jquery-clockpicker.min.js}"></script>
 <script th:src="@{/js/library/custom.min.js}" type="text/javascript">></script>
 <!-- Editable -->
-<script th:src="@{/js/library/jquery.dataTables.min.js}"></script>
-<script th:src="@{/js/library/dataTables.responsive.min.js}"></script>
+
+<script th:src="@{/js/library/wysihtml5-0.3.0.js}"></script>
+<script th:src="@{/js/library/bootstrap-wysihtml5.js}"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 <script>
-    $('#config-table').DataTable({
-        responsive: true
+    Dropzone.autoDiscover = false;
+    $(document).ready(function() {
+        $('.textarea_editor').wysihtml5();
     });
 </script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var existingFiles = /*[[${attachments}]]*/ 'default';
+    var folders = /*[[${folders}]]*/ 'default';
+    var driveFolderId = "";
+
+    /*]]>*/
+</script>
+<script th:src="@{/js/library/bootstrap-material-datetimepicker.js}"></script>
+<script th:src="@{/js/library/bootstrap-datepicker.min.js}"></script>
+<script>
+    // MAterial Date picker
+    $('#startDate, #endDate').bootstrapMaterialDatePicker({ weekStart: 0, time: false });
+    $('#timepicker').bootstrapMaterialDatePicker({ format: 'HH:mm', time: true, date: false });
+    $('#date-format').bootstrapMaterialDatePicker({ format: 'dddd DD MMMM YYYY - HH:mm' });
+
+    $('#min-date').bootstrapMaterialDatePicker({ format: 'DD/MM/YYYY HH:mm', minDate: new Date() });
+</script>
+<script th:src="@{/js/general-dropzone.js}" type="text/javascript"
+        th:data-csrf-token="${_csrf.token}" th:data-csrf-header="${_csrf.headerName}"></script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+# CUSTOMER DATA
+name,email,createdAt,country,idUser
+copie_Eric Navarro,copie_zwells@martinez-wilson.info,2025-03-27T08:52:20,Madagascar,61
+
+# LEAD DATA
+leadName,status,customerId
+Integrate compelling e-markets,assign-to-sales,2
+Redefine 24/7 deliverables,assign-to-sales,2
+Productize revolutionary models,assign-to-sales,2
+Deploy seamless schemas,assign-to-sales,2
+Deploy b2b applications,assign-to-sales,2
+Mesh best-of-breed users,assign-to-sales,2
+
+# TICKET DATA
+subject,status,customerId,createdAt
+Innovate next-generation web-readiness,archived,2,2025-03-27T08:52:21
+Innovate 24/7 synergies,archived,2,2025-03-27T08:52:21
+Benchmark strategic platforms,archived,2,2025-03-27T08:52:21
+Scale intuitive channels,archived,2,2025-03-27T08:52:21
+Cultivate distributed e-services,archived,2,2025-03-27T08:52:22
+
+# DEPENSE DATA
+montant,dateDepense,ticketSubject,leadName,etat
+9681.17,2025-03-27T08:52:21,,Integrate compelling e-markets,1
+2862.77,2025-03-27T08:52:21,,Redefine 24/7 deliverables,1
+6882.41,2025-03-27T08:52:21,,Productize revolutionary models,1
+8634.42,2025-03-27T08:52:21,,Deploy seamless schemas,1
+6229.91,2025-03-27T08:52:21,,Deploy b2b applications,1
+9667.26,2025-03-27T08:52:22,,Mesh best-of-breed users,1
+3070.29,2025-03-27T08:52:21,Innovate next-generation web-readiness,,1
+4759.42,2025-03-27T08:52:21,Innovate 24/7 synergies,,1
+4536.61,2025-03-27T08:52:21,Benchmark strategic platforms,,1
+7673.45,2025-03-27T08:52:21,Scale intuitive channels,,1
+7080.96,2025-03-27T08:52:22,Cultivate distributed e-services,,1
+
+

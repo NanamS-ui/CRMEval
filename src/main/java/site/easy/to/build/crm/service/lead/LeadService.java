@@ -32,4 +32,5 @@ public interface LeadService {
     List<Lead> getRecentLeadsByEmployee(int employeeId, int limit);
     List<Lead> getRecentCustomerLeads(int customerId, int limit);
     public void deleteAllByCustomer(Customer customer);
+    public void saveLead(String name, String status, int userId, int customerId, int employeeId);
 }

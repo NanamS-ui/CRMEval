@@ -167,6 +167,19 @@ public class LeadRestController {
         return ResponseEntity.ok(leads);
     }
 
+    @PostMapping
+    public ResponseEntity<String> createLead(@RequestBody Map<String, Object> leadData) {
+        String name = (String) leadData.get("name");
+        String status = (String) leadData.get("status");
+        int userId = ((Number) leadData.get("user_id")).intValue();
+        int customerId = ((Number) leadData.get("customer_id")).intValue();
+        int employeeId = ((Number) leadData.get("employee_id")).intValue();
+
+
+        leadService.saveLead(name, status, userId, customerId, employeeId);
+        return ResponseEntity.ok("Lead enregistré avec succès !");
+    }
+
     @GetMapping("/manager/all-leads-details")
     public ResponseEntity<List<Depense>> showAllTicketsDetails() {
         List<Depense> depenses = depenseRepository.findAllDepensesForLeads();
@@ -174,12 +187,7 @@ public class LeadRestController {
     }
 
     @DeleteMapping("/delete/{id}/{idDepense}")
-    public ResponseEntity<?> deleteLead(@PathVariable("id") int id, @PathVariable("idDepense") int idDepense,Authentication authentication) {
-        int userId = authenticationUtils.getLoggedInUserId(authentication);
-        User loggedInUser = userService.findById(userId);
-        if (loggedInUser.isInactiveUser()) {
-            return ResponseEntity.status(403).body("Account is inactive");
-        }
+    public ResponseEntity<?> deleteLead(@PathVariable("id") int id, @PathVariable("idDepense") int idDepense) {
 
         Lead lead = leadService.findByLeadId(id);
         if (lead == null) {

@@ -11,6 +11,7 @@ public interface BudgetService {
     Optional<Budget> findById(int id);
     Budget save(Budget budget);
     void delete(int id);
+    void delete(Budget budget);
     List<Budget> findByCustomerId(int customerId);
     double getTotalBudgetByCustomerId(int customerId);
     public Notification checkBudget(int customerId, double newDepense);

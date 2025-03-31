@@ -102,12 +102,7 @@ public class TicketRestController {
     }
 
     @DeleteMapping("/delete/{id}/{idDepense}")
-    public ResponseEntity<?> deleteLead(@PathVariable("id") int id, @PathVariable("idDepense") int idDepense,Authentication authentication) {
-        int userId = authenticationUtils.getLoggedInUserId(authentication);
-        User loggedInUser = userService.findById(userId);
-        if (loggedInUser.isInactiveUser()) {
-            return ResponseEntity.status(403).body("Account is inactive");
-        }
+    public ResponseEntity<?> deleteLead(@PathVariable("id") int id, @PathVariable("idDepense") int idDepense) {
 
         Ticket lead = ticketService.findByTicketId(id);
         if (lead == null) {
@@ -121,5 +116,10 @@ public class TicketRestController {
         ticketService.delete(lead);
 
         return ResponseEntity.ok("Lead deleted successfully");
+    }
+
+    @PostMapping
+    public Ticket saveTicket(@RequestBody Ticket ticket){
+        return ticketService.save(ticket);
     }
 }
